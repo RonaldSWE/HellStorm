@@ -1,9 +1,9 @@
 import pygame
 import random
 import os
-import Main_Menu
+import MainMenu # Import the main menu file for the full gameplay🤩
 
-# Initialize pygame
+# Initialize pygame 
 pygame.init()
 
 # Initialize mixer for sound
@@ -41,12 +41,12 @@ gamer_image = pygame.transform.scale(gamer_image, (gamer_detail, gamer_detail))
 to_dodge_detail = 50
 to_dodge_position1 = [random.randint(0, display_width - to_dodge_detail), 0]
 to_dodge_position2 = [random.randint(0, display_width - to_dodge_detail), 0]
-to_dodge_speed = 6
+to_dodge_speed = 7
 obstacle_image = pygame.image.load("Assets/Fire Drop.png")
 obstacle_image = pygame.transform.scale(obstacle_image, (to_dodge_detail, to_dodge_detail))
 
 # Coin setup
-coin_detail = 40
+coin_detail = 70
 coin_position = [random.randint(0, display_width - coin_detail), -coin_detail]
 coin_speed = 8
 coins_collected = 0
