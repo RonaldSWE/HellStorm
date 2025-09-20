@@ -45,13 +45,25 @@ to_dodge_speed = 7
 obstacle_image = pygame.image.load("Assets/Fire Drop.png")
 obstacle_image = pygame.transform.scale(obstacle_image, (to_dodge_detail, to_dodge_detail))
 
+
 # Coin setup
-coin_detail = 70
+coin_detail = 40
 coin_position = [random.randint(0, display_width - coin_detail), -coin_detail]
 coin_speed = 8
 coins_collected = 0
 coin_image = pygame.image.load("Assets/Coin.png")
 coin_image = pygame.transform.scale(coin_image, (coin_detail, coin_detail))
+
+# Shield Power up setup
+shield_detail = 50
+shield_image = pygame.image.load("Assets/ShieldPowerUP.png")
+shield_image = pygame.transform.scale(shield_image, (shield_detail, shield_detail))
+force_field_image = pygame.image.load("Assets/Force field.png")
+force_field_image = pygame.transform.scale(force_field_image, (gamer_detail+60, gamer_detail+60))
+shield_position = None
+shield_spawn_time = pygame.time.get_ticks()
+shield_active = False
+shield_end_time = 0
 
 # Score
 points = 0
@@ -92,8 +104,19 @@ def check_coin_collision(gamer_movement, coin_pos):
         return True
     return False
 
+def check_shield_collision(gamer_movement, shield_pos):
+    if shield_pos is None:
+        return False
+    p_x, p_y = gamer_movement
+    s_x, s_y = shield_pos
+    if (s_x < p_x < s_x + shield_detail or s_x < p_x + gamer_detail < s_x + shield_detail) and \
+        (s_y < p_y < s_y + shield_detail or s_y < p_y + gamer_detail < s_y + shield_detail):
+        return True
+    return False
+
 def run_game():
     global points, coins_collected, to_dodge_speed, to_dodge_position1, to_dodge_position2, coin_position, gamer_movement, high_score
+    global shield_position, shield_spawn_time, shield_active, shield_end_time
     game_over = False
     while not game_over:
         for event in pygame.event.get():
@@ -116,6 +139,28 @@ def run_game():
         to_dodge_position2[1] += to_dodge_speed
         coin_position[1] += coin_speed
 
+        # Shield spawn logic
+        now = pygame.time.get_ticks()
+        if shield_position is None and now - shield_spawn_time > 15000:
+            shield_position = [random.randint(0, display_width - shield_detail), -shield_detail]
+            shield_spawn_time = now
+
+        # Move shield down if active
+        if shield_position:
+            shield_position[1] += 7  # Same speed as fire obstacles
+            if shield_position[1] > display_height:
+                shield_position = None
+
+        # Shield collision
+        if shield_position and check_shield_collision(gamer_movement, shield_position):
+            shield_active = True
+            shield_end_time = now + 7000
+            shield_position = None
+
+        # Shield timer
+        if shield_active and now > shield_end_time:
+            shield_active = False
+
         if to_dodge_position1[1] > display_height:
             to_dodge_position1 = [random.randint(0, display_width - to_dodge_detail), 0]
             points += 1
@@ -126,7 +171,9 @@ def run_game():
             to_dodge_speed += 0.5
         if coin_position[1] > display_height:
             coin_position = [random.randint(0, display_width - coin_detail), -coin_detail]
-        if check_for_collision(gamer_movement, to_dodge_position1) or check_for_collision(gamer_movement, to_dodge_position2):
+
+        # Only check collision if shield not active
+        if not shield_active and (check_for_collision(gamer_movement, to_dodge_position1) or check_for_collision(gamer_movement, to_dodge_position2)):
             collision_sound.play()
             game_over = True
             break
@@ -141,6 +188,14 @@ def run_game():
         display.blit(obstacle_image, (to_dodge_position1[0], to_dodge_position1[1]))
         display.blit(obstacle_image, (to_dodge_position2[0], to_dodge_position2[1]))
         display.blit(coin_image, (coin_position[0], coin_position[1]))
+        if shield_position:
+            display.blit(shield_image, (shield_position[0], shield_position[1]))
+        if shield_active:
+            # Center force field on player
+            ff_width, ff_height = force_field_image.get_size()
+            ff_x = gamer_movement[0] + gamer_detail//2 - ff_width//2
+            ff_y = gamer_movement[1] + gamer_detail//2 - ff_height//2
+            display.blit(force_field_image, (ff_x, ff_y))
         display.blit(gamer_image, (gamer_movement[0], gamer_movement[1]))
         score_text = font.render(f"Score: {points}", True, color1)
         coins_text = font.render(f"Coins: {coins_collected}", True, color1)
