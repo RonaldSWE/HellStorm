@@ -17,8 +17,8 @@ def draw_window():
 def main_menu():
     # Play Hell Screams sound
     hell_screams = pygame.mixer.Sound("Assets/Hell Screams.mp3")
-    hell_screams.play()
     hell_screams.set_volume(3.0)
+    hell_screams.play(-1)
 
     # Try to use a scary font, fallback to BOLD if not available
     try:
