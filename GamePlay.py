@@ -154,7 +154,7 @@ def run_game():
         # Shield collision
         if shield_position and check_shield_collision(gamer_movement, shield_position):
             shield_active = True
-            shield_end_time = now + 7000
+            shield_end_time = now + 10000
             shield_position = None
 
         # Shield timer
