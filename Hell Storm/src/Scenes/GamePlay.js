@@ -5,14 +5,14 @@ class GamePlay extends Phaser.Scene {
 
   preload() {
     /* ---------- Loading the Assets ---------- */
-    this.load.image("bg2", "Assets/Hell Fire.png");
-    this.load.image("player", "Assets/Player.png");
-    this.load.image("fire_drop", "Assets/Fire Drop.png");
-    this.load.image("coin", "Assets/Coin.png");
-    this.load.image("force_field", "Assets/Force field.png");
-    this.load.image("shield_powerUp", "Assets/ShieldPowerUP.png");
-    this.load.audio("coin_sound", "Assets/Coin sound.png");
-    this.load.audio("death_sound", "Assets/Death sound.png");
+    this.load.image("bg2", "Assets/Images/Hell Fire.png");
+    this.load.image("player", "Assets/Images/Player.png");
+    this.load.image("fire_drop", "Assets/Images/Fire Drop.png");
+    this.load.image("coin", "Assets/Images/Coin.png");
+    this.load.image("force_field", "Assets/Images/Force field.png");
+    this.load.image("shield_powerUp", "Assets/Images/ShieldPowerUP.png");
+    this.load.audio("coin_sound", "Assets/Audio/Coin sound.mp3");
+    this.load.audio("death_sound", "Assets/Audio/Death sound.mp3");
   }
 
   create() {
@@ -21,7 +21,7 @@ class GamePlay extends Phaser.Scene {
 
     // Creating a physics sprite
     this.player = this.physics.add
-      .sprite(400, 400, "player")
+      .sprite(600, 600, "player")
       .setDisplaySize(50, 50);
     this.player.setCollideWorldBounds(true);
 
@@ -31,19 +31,71 @@ class GamePlay extends Phaser.Scene {
       player.setPosition(dragX, dragY);
     });
 
+    // Enable keyboard input for movement
     this.cursor = this.input.keyboard.createCursorKeys();
+
+    // Create a group to manage all falling fire drops
+    // Using a group allows collision detection with multiple fire objects
+    this.fireGroup = this.physics.add.group();
+
+    // Spawn falling fire drops every 0.4 seconds at random positions
+    this.time.addEvent({
+      delay: 400,
+      callback: () => {
+        let x = Phaser.Math.Between(0, this.sys.game.config.width);
+        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        // Create fire sprite and add to group with downward velocity
+        this.fireGroup.create(x, y, "fire_drop")
+          .setDisplaySize(60, 60)
+          .setVelocity(0, 100); // Move downward at 100 pixels/second
+      },
+      loop: true,
+    });
+
+    // Detect collision between player and ANY fire drop in the group
+    // Using overlap instead of collider for continuous collision checking
+    this.physics.add.overlap(this.player, this.fireGroup, (player, fire) => {
+      fire.destroy();
+      this.sound.play("death_sound");
+      this.scene.switch("GameOver");
+    });
+
+    // Create a group to manage all falling coins
+    // Using a group allows collision detection with multiple coin objects
+    this.coinGroup = this.physics.add.group();
+
+    // Spawn falling coins every 2 seconds at random positions
+    this.time.addEvent({
+      delay: 2000,
+      callback: () => {
+        let x = Phaser.Math.Between(0, this.sys.game.config.width);
+        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        // Create fire sprite and add to group with downward velocity
+        this.coinGroup.create(x, y, "coin")
+          .setDisplaySize(60, 60)
+          .setVelocity(0, 100); // Move downward at 100 pixels/second
+      },
+      loop: true,
+    });
+
+    // Detect collision between player and ANY coins in the group
+    // Using overlap instead of collider for continuous collision checking
+    this.physics.add.overlap(this.player, this.coinGroup, (player, coin) => {
+      coin.destroy();
+      this.sound.play("coin_sound");
+    });
   }
 
   update() {
     /* ---------- Keyboard Movements ---------- */
     if (this.cursor.left.isDown) {
-      this.player.x -= 4;
+      this.player.x -= 7;
     } else if (this.cursor.right.isDown) {
-      this.player.x += 4;
-    } else if (this.cursor.up.isDown) {
-      this.player.y -= 4;
-    } else if (this.cursor.down.isDown) {
-      this.player.y += 4;
+      this.player.x += 7;
+    } else if (this.cursor.space.isDown) {
+      this.player.y -= 7;
+    } else {
+      return 0;
     }
   }
 }

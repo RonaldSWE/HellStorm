@@ -5,10 +5,10 @@ class MainMenu extends Phaser.Scene {
 
   preload() {
     /* ---------- Loading the Assets ---------- */
-    this.load.image("bg", "Assets/Main Menu pic.png");
-    this.load.image("play_btn", "Assets/Hell Play.png");
-    this.load.image("shop_btn", "Assets/Shop btn.png");
-    this.load.audio("hell_screams", "Assets/Hell Screams.mp3");
+    this.load.image("bg", "Assets/Images/Main Menu pic.png");
+    this.load.image("play_btn", "Assets/Images/Hell Play.png");
+    this.load.image("shop_btn", "Assets/Images/Shop btn.png");
+    this.load.audio("hell_screams", "Assets/Audio/Hell Screams.mp3");
   }
 
   create() {
@@ -35,12 +35,12 @@ class MainMenu extends Phaser.Scene {
     this.play_btn.setInteractive({ cursor: "pointer" });
     this.shop_btn.setInteractive({ cursor: "pointer" });
 
-    // Adding the Hell Screams sound as main menu music😈
-    this.menuMusic = this.sound.add("hell_screams", {
-      loop: true,
-      volume: 0.6,
-    }); 
-    this.menuMusic.play();
+      // Adding the Hell Screams sound as main menu music😈
+      this.menuMusic = this.sound.add("hell_screams", {
+        loop: true,
+        volume: 0.90,
+      });
+      this.menuMusic.play();
 
     // When Play is clicked
     this.play_btn.on("pointerdown", () => {
@@ -48,10 +48,16 @@ class MainMenu extends Phaser.Scene {
       this.scene.switch("GamePlay"); // ▶ switch scene
     });
 
+    // When Shop is clicked
     this.shop_btn.on("pointerdown", () => {
       this.menuMusic.stop();
       this.scene.switch("Shop");
     });
+
+    this.add.text(400 / 2, 550, "Wanna hear something cool, click the screen😈", {
+      fontSize: 20,
+      fontFamily: "creepster"
+    })
   }
 }
 
