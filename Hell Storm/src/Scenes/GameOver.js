@@ -24,7 +24,7 @@ class GameOver extends Phaser.Scene {
     this.restart_btn.setInteractive({ cursor: "pointer" });
 
     this.restart_btn.on("pointerdown", () => {
-      this.scene.switch("GamePlay");
+      this.scene.start("GamePlay");
     });
   }
 }

@@ -47,7 +47,7 @@ class GamePlay extends Phaser.Scene {
         // Create fire sprite and add to group with downward velocity
         this.fireGroup.create(x, y, "fire_drop")
           .setDisplaySize(60, 60)
-          .setVelocity(0, 100); // Move downward at 100 pixels/second
+          .setVelocity(0, 50); // Move downward at 50 pixels/second
       },
       loop: true,
     });
@@ -64,9 +64,9 @@ class GamePlay extends Phaser.Scene {
     // Using a group allows collision detection with multiple coin objects
     this.coinGroup = this.physics.add.group();
 
-    // Spawn falling coins every 2 seconds at random positions
+    // Spawn falling coins every 1 second at random positions
     this.time.addEvent({
-      delay: 2000,
+      delay: 1000,
       callback: () => {
         let x = Phaser.Math.Between(0, this.sys.game.config.width);
         let y = Phaser.Math.Between(0, this.sys.game.config.height);
@@ -80,10 +80,21 @@ class GamePlay extends Phaser.Scene {
 
     // Detect collision between player and ANY coins in the group
     // Using overlap instead of collider for continuous collision checking
+    // And also increment the coin count whenever a coin is collected
+    let coin_count = 0;
+
+    let coinText = this.add.text(10, 50, `Coins: ${coin_count}`, {
+      fontSize: 30,
+      fontFamily: "Creepster",
+    });
+
     this.physics.add.overlap(this.player, this.coinGroup, (player, coin) => {
       coin.destroy();
+      ++coin_count;
+      coinText.setText(`Coins: ${coin_count}`);
       this.sound.play("coin_sound");
     });
+
   }
 
   update() {

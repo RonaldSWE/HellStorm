@@ -6,7 +6,6 @@ class Shop extends Phaser.Scene {
   preload() {}
 
   create() {
-    // Creating the Shop Background
     this.add.text(200 / 2, 400 / 2, "Coming Soon😈", {
       fontSize: 100,
       fontFamily: "Creepster",
