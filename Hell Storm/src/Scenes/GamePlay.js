@@ -45,7 +45,8 @@ class GamePlay extends Phaser.Scene {
         let x = Phaser.Math.Between(0, this.sys.game.config.width);
         let y = Phaser.Math.Between(0, this.sys.game.config.height);
         // Create fire sprite and add to group with downward velocity
-        this.fireGroup.create(x, y, "fire_drop")
+        this.fireGroup
+          .create(x, y, "fire_drop")
           .setDisplaySize(60, 60)
           .setVelocity(0, 50); // Move downward at 50 pixels/second
       },
@@ -56,8 +57,12 @@ class GamePlay extends Phaser.Scene {
     // Using overlap instead of collider for continuous collision checking
     this.physics.add.overlap(this.player, this.fireGroup, (player, fire) => {
       fire.destroy();
-      this.sound.play("death_sound");
-      this.scene.switch("GameOver");
+      
+      // Only trigger game over if player is not shielded
+      if (!this.shielded) {
+        this.sound.play("death_sound");
+        this.scene.switch("GameOver");
+      }
     });
 
     // Create a group to manage all falling coins
@@ -71,7 +76,8 @@ class GamePlay extends Phaser.Scene {
         let x = Phaser.Math.Between(0, this.sys.game.config.width);
         let y = Phaser.Math.Between(0, this.sys.game.config.height);
         // Create fire sprite and add to group with downward velocity
-        this.coinGroup.create(x, y, "coin")
+        this.coinGroup
+          .create(x, y, "coin")
           .setDisplaySize(60, 60)
           .setVelocity(0, 100); // Move downward at 100 pixels/second
       },
@@ -95,9 +101,62 @@ class GamePlay extends Phaser.Scene {
       this.sound.play("coin_sound");
     });
 
+    // Create a group to manage all falling shields
+    // Using a group allows collision detection with multiple coin objects
+    this.shieldGroup = this.physics.add.group();
+
+    // Spawn falling shields every 10 second at random positions
+    this.time.addEvent({
+      delay: 10000,
+      callback: () => {
+        let x = Phaser.Math.Between(0, this.sys.game.config.width);
+        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        // Create fire sprite and add to group with downward velocity
+        this.shieldGroup
+          .create(x, y, "shield_powerUp")
+          .setDisplaySize(60, 60)
+          .setVelocity(0, 50); // Move downward at 50 pixels/second
+      },
+      loop: true,
+    });
+
+    // Detect collision between player and ANY shields in the group
+    // Using overlap instead of collider for continuous collision checking
+    this.shielded = false;
+    this.forceField = null;
+
+    this.physics.add.overlap(this.player, this.shieldGroup, (player, shield) => {
+      shield.destroy();
+      
+      // If shield already exists, destroy it first
+      if (this.forceField) {
+        this.forceField.destroy();
+      }
+      
+      // Create forcefield image around the player
+      this.forceField = this.add.image(this.player.x, this.player.y, "force_field")
+        .setDisplaySize(80, 80);
+      
+      // Make player immune to fire
+      this.shielded = true;
+      
+      // Remove shield after 10 seconds
+      this.time.delayedCall(10000, () => {
+        if (this.forceField) {
+          this.forceField.destroy();
+          this.forceField = null;
+        }
+        this.shielded = false;
+      });
+    });
   }
 
   update() {
+    // Keep force field following the player
+    if (this.forceField && this.forceField.active) {
+      this.forceField.setPosition(this.player.x, this.player.y);
+    }
+
     /* ---------- Keyboard Movements ---------- */
     if (this.cursor.left.isDown) {
       this.player.x -= 7;
