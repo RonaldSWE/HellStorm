@@ -124,29 +124,31 @@ class GamePlay extends Phaser.Scene {
     // Using overlap instead of collider for continuous collision checking
     this.shielded = false;
     this.forceField = null;
+    this.shieldTimer = null;
 
     this.physics.add.overlap(this.player, this.shieldGroup, (player, shield) => {
       shield.destroy();
-      
-      // If shield already exists, destroy it first
-      if (this.forceField) {
-        this.forceField.destroy();
+
+      // If a shield timer is already running, cancel it
+      if (this.shieldTimer) {
+        this.shieldTimer.remove();
+      }
+
+      // If shield doesn't exist, create it
+      if (!this.forceField) {
+        this.forceField = this.add.image(this.player.x, this.player.y, "force_field")
+          .setDisplaySize(100, 100);
+        this.shielded = true;
       }
       
-      // Create force field image around the player
-      this.forceField = this.add.image(this.player.x, this.player.y, "force_field")
-        .setDisplaySize(80, 80);
-      
-      // Make player immune to fire
-      this.shielded = true;
-      
-      // Remove shield after 10 seconds
-      this.time.delayedCall(10000, () => {
+      // Add or extend shield by 10 seconds
+      this.shieldTimer = this.time.delayedCall(10000, () => {
         if (this.forceField) {
           this.forceField.destroy();
           this.forceField = null;
         }
         this.shielded = false;
+        this.shieldTimer = null;
       });
     });
   }
