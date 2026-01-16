@@ -133,7 +133,7 @@ class GamePlay extends Phaser.Scene {
         this.forceField.destroy();
       }
       
-      // Create forcefield image around the player
+      // Create force field image around the player
       this.forceField = this.add.image(this.player.x, this.player.y, "force_field")
         .setDisplaySize(80, 80);
       
