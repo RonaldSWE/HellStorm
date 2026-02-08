@@ -13,7 +13,7 @@ class Shop extends Phaser.Scene {
     });
   }
 
-  preload() {}
+  update() {}
 }
 
 export default Shop;

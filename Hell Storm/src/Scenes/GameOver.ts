@@ -8,6 +8,9 @@ class GameOver extends Phaser.Scene {
     this.load.image("restart_btn", "Assets/Images/Restart Btn.png");
   }
 
+  // Object creation
+  restart_btn!: any;
+
   create() {
     this.add.image(400, 300, "bg2").setDisplaySize(800, 600);
 

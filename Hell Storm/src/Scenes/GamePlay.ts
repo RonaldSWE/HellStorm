@@ -15,6 +15,18 @@ class GamePlay extends Phaser.Scene {
     this.load.audio("death_sound", "Assets/Audio/Death sound.mp3");
   }
 
+  // Game objects
+  player!: Phaser.Physics.Arcade.Sprite;
+  cursor!: Phaser.Types.Input.Keyboard.CursorKeys;
+  fireGroup!: Phaser.Physics.Arcade.Group;
+  shieldGroup!: any;
+  shielded!: any;
+  coinGroup!: any;
+  forceField!: any;
+  shieldTimer!: any;
+  pointsText!: Phaser.GameObjects.Text;
+  points: number = 0;
+
   create() {
     // Creating the Main Menu Background
     this.add.image(400, 300, "bg2").setDisplaySize(800, 600);
@@ -27,28 +39,31 @@ class GamePlay extends Phaser.Scene {
 
     /* ---------- TouchScreen Movements ---------- */
     this.player.setInteractive({ draggable: true, cursor: "pointer" });
-    this.input.on("drag", (pointer, player, dragX, dragY) => {
-      player.setPosition(dragX, dragY);
-    });
+    this.input.on(
+      "drag",
+      (pointer: any, player: any, dragX: number, dragY: number) => {
+        player.setPosition(dragX, dragY);
+      },
+    );
 
     // Enable keyboard input for movement
-    this.cursor = this.input.keyboard.createCursorKeys();
+    this.cursor = this.input.keyboard!.createCursorKeys();
 
     // Create a group to manage all falling fire drops
     // Using a group allows collision detection with multiple fire objects
     this.fireGroup = this.physics.add.group();
 
-    // Spawn falling fire drops every 0.4 seconds at random positions
+    // Spawn falling fire drops every 0.5 seconds at random positions
     this.time.addEvent({
-      delay: 400,
+      delay: 500,
       callback: () => {
-        let x = Phaser.Math.Between(0, this.sys.game.config.width);
-        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        let x = Phaser.Math.Between(0, Number(this.sys.game.config.width));
+        let y = 0; // This makes sure the fire only spawns from the top
         // Create fire sprite and add to group with downward velocity
         this.fireGroup
           .create(x, y, "fire_drop")
           .setDisplaySize(60, 60)
-          .setVelocity(0, 50); // Move downward at 50 pixels/second
+          .setVelocity(0, 200); // Move downward at 200 pixels/second
       },
       loop: true,
     });
@@ -57,7 +72,7 @@ class GamePlay extends Phaser.Scene {
     // Using overlap instead of collider for continuous collision checking
     this.physics.add.overlap(this.player, this.fireGroup, (player, fire) => {
       fire.destroy();
-      
+
       // Only trigger game over if player is not shielded
       if (!this.shielded) {
         this.sound.play("death_sound");
@@ -73,8 +88,8 @@ class GamePlay extends Phaser.Scene {
     this.time.addEvent({
       delay: 1000,
       callback: () => {
-        let x = Phaser.Math.Between(0, this.sys.game.config.width);
-        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        let x = Phaser.Math.Between(0, Number(this.sys.game.config.width));
+        let y = 0;
         // Create fire sprite and add to group with downward velocity
         this.coinGroup
           .create(x, y, "coin")
@@ -94,6 +109,12 @@ class GamePlay extends Phaser.Scene {
       fontFamily: "Creepster",
     });
 
+    this.pointsText = this.add.text(10, 10, `Points: ${this.points}`, {
+      fontSize: 30,
+      fontFamily: "Creepster",
+    });
+
+    // When the player hits a coin, increment the coin count
     this.physics.add.overlap(this.player, this.coinGroup, (player, coin) => {
       coin.destroy();
       ++coin_count;
@@ -109,8 +130,8 @@ class GamePlay extends Phaser.Scene {
     this.time.addEvent({
       delay: 10000,
       callback: () => {
-        let x = Phaser.Math.Between(0, this.sys.game.config.width);
-        let y = Phaser.Math.Between(0, this.sys.game.config.height);
+        let x = Phaser.Math.Between(0, Number(this.sys.game.config.width));
+        let y = 0;
         // Create fire sprite and add to group with downward velocity
         this.shieldGroup
           .create(x, y, "shield_powerUp")
@@ -126,31 +147,36 @@ class GamePlay extends Phaser.Scene {
     this.forceField = null;
     this.shieldTimer = null;
 
-    this.physics.add.overlap(this.player, this.shieldGroup, (player, shield) => {
-      shield.destroy();
+    this.physics.add.overlap(
+      this.player,
+      this.shieldGroup,
+      (player, shield) => {
+        shield.destroy();
 
-      // If a shield timer is already running, cancel it
-      if (this.shieldTimer) {
-        this.shieldTimer.remove();
-      }
-
-      // If shield doesn't exist, create it
-      if (!this.forceField) {
-        this.forceField = this.add.image(this.player.x, this.player.y, "force_field")
-          .setDisplaySize(100, 100);
-        this.shielded = true;
-      }
-      
-      // Add or extend shield by 10 seconds
-      this.shieldTimer = this.time.delayedCall(10000, () => {
-        if (this.forceField) {
-          this.forceField.destroy();
-          this.forceField = null;
+        // If a shield timer is already running, cancel it
+        if (this.shieldTimer) {
+          this.shieldTimer.remove();
         }
-        this.shielded = false;
-        this.shieldTimer = null;
-      });
-    });
+
+        // If shield doesn't exist, create it
+        if (!this.forceField) {
+          this.forceField = this.add
+            .image(this.player.x, this.player.y, "force_field")
+            .setDisplaySize(100, 100);
+          this.shielded = true;
+        }
+
+        // Add or extend shield by 10 seconds
+        this.shieldTimer = this.time.delayedCall(10000, () => {
+          if (this.forceField) {
+            this.forceField.destroy();
+            this.forceField = null;
+          }
+          this.shielded = false;
+          this.shieldTimer = null;
+        });
+      },
+    );
   }
 
   update() {
@@ -158,6 +184,16 @@ class GamePlay extends Phaser.Scene {
     if (this.forceField && this.forceField.active) {
       this.forceField.setPosition(this.player.x, this.player.y);
     }
+
+    // Check if fire drops have fallen off screen and increment points
+    const screenHeight = Number(this.sys.game.config.height);
+    this.fireGroup.children.entries.forEach((fire: any) => {
+      if (fire.y > screenHeight) {
+        fire.destroy();
+        this.points++;
+        this.pointsText.setText(`Points: ${this.points}`);
+      }
+    });
 
     /* ---------- Keyboard Movements ---------- */
     if (this.cursor.left.isDown) {

@@ -11,6 +11,14 @@ class MainMenu extends Phaser.Scene {
     this.load.audio("hell_screams", "Assets/Audio/Hell Screams.mp3");
   }
 
+  // The game objects
+  play_btn!: Phaser.GameObjects.Image;
+  shop_btn!: Phaser.GameObjects.Image;
+  menuMusic!:
+    | Phaser.Sound.NoAudioSound
+    | Phaser.Sound.HTML5AudioSound
+    | Phaser.Sound.WebAudioSound;
+
   create() {
     // Creating the Main Menu Background
     this.add.image(400, 300, "bg").setDisplaySize(800, 600);
@@ -35,12 +43,12 @@ class MainMenu extends Phaser.Scene {
     this.play_btn.setInteractive({ cursor: "pointer" });
     this.shop_btn.setInteractive({ cursor: "pointer" });
 
-      // Adding the Hell Screams sound as main menu music😈
-      this.menuMusic = this.sound.add("hell_screams", {
-        loop: true,
-        volume: 0.90,
-      });
-      this.menuMusic.play();
+    // Adding the Hell Screams sound as main menu music😈
+    this.menuMusic = this.sound.add("hell_screams", {
+      loop: true,
+      volume: 0.9,
+    });
+    this.menuMusic.play();
 
     // When Play is clicked
     this.play_btn.on("pointerdown", () => {
@@ -54,10 +62,15 @@ class MainMenu extends Phaser.Scene {
       this.scene.switch("Shop");
     });
 
-    this.add.text(400 / 2, 550, "Wanna hear something cool, click the screen😈", {
-      fontSize: 20,
-      fontFamily: "creepster"
-    })
+    this.add.text(
+      400 / 2,
+      550,
+      "Wanna hear something cool, click the screen😈",
+      {
+        fontSize: 20,
+        fontFamily: "creepster",
+      },
+    );
   }
 }
 
