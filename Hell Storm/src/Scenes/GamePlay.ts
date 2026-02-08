@@ -190,7 +190,7 @@ class GamePlay extends Phaser.Scene {
     this.fireGroup.children.entries.forEach((fire: any) => {
       if (fire.y > screenHeight) {
         fire.destroy();
-        this.points++;
+        ++this.points;
         this.pointsText.setText(`Points: ${this.points}`);
       }
     });
