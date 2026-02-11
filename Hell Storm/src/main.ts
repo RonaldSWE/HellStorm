@@ -10,7 +10,7 @@ const config: Phaser.Types.Core.GameConfig = {
   height: 600,
   physics: {
     default: "arcade",
-    arcade: { gravity: { y: 200, x: 0 } },
+    arcade: { gravity: { x: 0, y: 200 } },
   },
   scene: [MainMenu, GamePlay, Shop, GameOver],
   scale: {

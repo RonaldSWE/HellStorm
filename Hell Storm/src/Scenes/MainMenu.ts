@@ -1,3 +1,5 @@
+import Phaser from "phaser";
+
 class MainMenu extends Phaser.Scene {
   constructor() {
     super("MainMenu");
@@ -63,10 +65,7 @@ class MainMenu extends Phaser.Scene {
     });
 
     this.add.text(
-      400 / 2,
-      550,
-      "Wanna hear something cool, click the screen😈",
-      {
+      400 / 2, 550, "Wanna hear something cool, click the screen😈", {
         fontSize: 20,
         fontFamily: "creepster",
       },

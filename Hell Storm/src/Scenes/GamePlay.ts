@@ -1,3 +1,5 @@
+import Phaser from "phaser";
+
 class GamePlay extends Phaser.Scene {
   constructor() {
     super("GamePlay");
@@ -25,6 +27,7 @@ class GamePlay extends Phaser.Scene {
   forceField!: any;
   shieldTimer!: any;
   pointsText!: Phaser.GameObjects.Text;
+  coinText!: Phaser.GameObjects.Text;
   points: number = 0;
 
   create() {
@@ -91,10 +94,10 @@ class GamePlay extends Phaser.Scene {
         let x = Phaser.Math.Between(0, Number(this.sys.game.config.width));
         let y = 0;
         // Create fire sprite and add to group with downward velocity
-        this.coinGroup
-          .create(x, y, "coin")
-          .setDisplaySize(60, 60)
-          .setVelocity(0, 100); // Move downward at 100 pixels/second
+          this.coinGroup
+            .create(x, y, "coin")
+            .setDisplaySize(60, 50)
+            .setVelocity(0, 100); // Move downward at 100 pixels/second
       },
       loop: true,
     });
@@ -104,7 +107,7 @@ class GamePlay extends Phaser.Scene {
     // And also increment the coin count whenever a coin is collected
     let coin_count = 0;
 
-    let coinText = this.add.text(10, 50, `Coins: ${coin_count}`, {
+    this.coinText = this.add.text(10, 50, `Coins: ${coin_count}`, {
       fontSize: 30,
       fontFamily: "Creepster",
     });
@@ -118,7 +121,7 @@ class GamePlay extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.coinGroup, (player, coin) => {
       coin.destroy();
       ++coin_count;
-      coinText.setText(`Coins: ${coin_count}`);
+      this.coinText.setText(`Coins: ${coin_count}`);
       this.sound.play("coin_sound");
     });
 
