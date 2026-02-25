@@ -31,6 +31,9 @@ class GamePlay extends Phaser.Scene {
   points: number = 0;
 
   create() {
+    // Reset game state
+    this.points = 0;
+
     // Creating the Main Menu Background
     this.add.image(400, 300, "bg2").setDisplaySize(800, 600);
 
